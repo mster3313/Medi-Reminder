@@ -6,7 +6,7 @@
 #define ALARM_THREE 300
 
 
-boolean getAlarmStatus(unsigned int alarm) {
+boolean getAlarmStatus(int alarm) {
   if (alarm == ALARM_ONE) {
     return alarm_one;
   }else if (alarm == ALARM_TWO){
@@ -18,13 +18,13 @@ boolean getAlarmStatus(unsigned int alarm) {
   }
 }
 
-unsigned int getAlarmNumber(String t) {
+int getAlarmNumber(String t) {
   if (t.equals(alarmOne)) return ALARM_ONE;
   if (t.equals(alarmTwo)) return ALARM_TWO;
   if (t.equals(alarmThree)) return ALARM_THREE;
 }
 
-void turnOffAlarm (unsigned int alarm) {
+void turnOffAlarm (int alarm) {
   switch (alarm) {
     case ALARM_ONE:
       alarm_one = false;

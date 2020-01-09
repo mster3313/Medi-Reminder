@@ -2,6 +2,7 @@
 #include <Wire.h>
 #include "RTClib.h"
 #include <LiquidCrystal_I2C.h>
+#include <EEPROM.h>
 
 
 // Variables for Led Strip ----
@@ -51,7 +52,6 @@ const int buzzer = 10;
 #define INSIDE_ADJUST_DATE 10
 #define ADJUST_DATE_FINAL 11
 
-
 //MENU_IDs
 #define MAIN_MENU 30
 #define MAIN_MENU_PAGE_1 31
@@ -73,34 +73,50 @@ const int buzzer = 10;
 #define ADJUST_TIME_CONFIRM 47
 #define ADJUST_DATE_CONFIRM 48
 
-//Exit Codes
-#define EXIT_CODE_MAIN_MENU 50
-#define EXIT_CODE_DISABLE_ALARM 51
-#define EXIT_CODE_SET_ALARM 52
-#define EXIT_CODE_SET_ALARM_MENU 53
-
-//Destination menu Codes
-#define MOVE_TO_SET_ALARM 20
-#define MOVE_TO_DISABLE_ALARM 21
-#define MOVE_TO_SET_ALARM_MENU 22
-#define MOVE_TO_SET_ALARM_FINAL 23
-#define MOVE_TO_ADJUST_TIME_FINAL 24
-#define MOVE_TO_ADJUST_TIME 25
-#define MOVE_TO_ADJUST_DATE 26
-#define MOVE_TO_ADJUST_DATE_FINAL 27
-
-unsigned int state = CLOCK_DISPLAY;
+int state = CLOCK_DISPLAY;
 boolean isOnAlarm = false;
-unsigned int counter = 0;
+int counter = 0;
 
+//Store Alarm as String after created
 String alarmOne = "";
 String alarmTwo = "";
 String alarmThree = "";
 
-String times = "";
+//Store if alarm set (true) or not (false)
+boolean alarm_one = false;
+boolean alarm_two = false;
+boolean alarm_three = false;
+
+typedef struct {
+  boolean alarmOneStatus = false;
+  boolean alarmTwoStatus = false;
+  boolean alarmThreeStatus = false;
+  String alarmStringOne = "";
+  String alarmStringTwo = "";
+  String alarmStringThree = "";
+} alarmObject;
+
+alarmObject alarm;
+int eeAddress = 0;
+
+void getValuesFromEEPROMonStart() {
+  EEPROM.get(eeAddress, alarm);
+  alarm_one = alarm.alarmOneStatus;
+  alarm_two = alarm.alarmTwoStatus;
+  alarm_three = alarm.alarmThreeStatus;
+
+  alarmOne = alarm.alarmStringOne;
+  alarmTwo = alarm.alarmStringTwo;
+  alarmThree = alarm.alarmStringThree;
+
+}
 
 void setup() {
   //  Serial.begin(9600);
+
+  //Store Previously set alarm from EEPROM
+  getValuesFromEEPROMonStart();
+  delay(500);
 
   //Setting Keypad pins as inputs
   pinMode(SELECT_KEY, INPUT);
@@ -143,7 +159,7 @@ void loop() {
     lcd.noBacklight();
   }
 
-  times = getTimeInfo(rtc, mode);  //get time String in the format hh:mm
+  String times = getTimeInfo(rtc, mode);         //get time String in the format hh:mm
   String date = getDateInfo(rtc);         //get date String in the format dd.mm.yy
 
   //Printing time and date
@@ -162,40 +178,40 @@ void loop() {
       state = CLOCK_DISPLAY;
     }
     isOnAlarm = getAlarmStatus(getAlarmNumber(times));
+    lightLED(getRowToAlarm(times), rtc.now().dayOfTheWeek());
+
     while (isOnAlarm) {
-      lightLED(counter, rtc.now().dayOfTheWeek());
       displayMenu(ALARM_RINGING);
       buzzAlarm(times);
       times = getTimeInfo(rtc, mode);
       isOnAlarm = getAlarmStatus(getAlarmNumber(times));
       lcd.clear();
     }
+
     turnOffAlarm (getAlarmNumber(times));
-    ledOff(counter, rtc.now().dayOfTheWeek());
-    increaseAlarmCounter();
+    ledOff(getRowToAlarm(times), rtc.now().dayOfTheWeek());
   }
 }
 
 //Function to initialize lcd display and show welcome screen
 void initDisplay() {
   lcd.begin();
-  lcd.backlight();      //Turn on the backlight
-  backLightOnMoment = millis() / 60000; //save the time when the backlight turned on
-  lcd.setCursor(4, 0);  //Set the cursor at line 1 position 5
+  lcd.backlight();                            //Turn on the backlight
+  backLightOnMoment = millis() / 60000;       //save the time when the backlight turned on
+  lcd.setCursor(4, 0);                        //Set the cursor at line 1 position 5
   lcd.print("Welcome");
-  lcd.setCursor(1, 1);  //Set the cursor at line 2 position 2
-
+  lcd.setCursor(1, 1);                        //Set the cursor at line 2 position 2
   lcd.print("*MediReminder*");
   delay(2000);
-  lcd.clear();          //Clearing the display for other things
+  lcd.clear();                                //Clearing the display for other things
 }
 
 void lightLED(unsigned int stripIndex, unsigned int ledNumber) {
   if (ledNumber == 0) ledNumber = 7;
   if (stripIndex == 1) {
-    leds[stripIndex][7 - ledNumber] = CHSV(255, 255, random8());
+    leds[stripIndex][7 - ledNumber] = CHSV(random8(1, 255), 255, random8(1, 255));
   } else {
-    leds[stripIndex][ledNumber - 1] = CHSV(255, 255, random8());
+    leds[stripIndex][ledNumber - 1] = CHSV(random8(1, 255), 255, random8(1, 255));
   }
   FastLED.show();
 }
@@ -210,7 +226,8 @@ void ledOff(unsigned int stripIndex, unsigned int ledNumber) {
   FastLED.show();
 }
 
-void increaseAlarmCounter() {
-  ++counter;
-  if (counter > 2) counter = 0;
+int getRowToAlarm(String t) {
+  if (t.equals(alarmOne)) return 0;
+  if (t.equals(alarmTwo)) return 1;
+  if (t.equals(alarmThree)) return 2;
 }
