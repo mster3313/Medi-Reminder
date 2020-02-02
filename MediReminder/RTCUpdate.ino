@@ -13,13 +13,15 @@ int cursorPositionDate = 3;
 int currentValueDate = 0;
 
 String getDateInfo(RTC_DS1307 rtc) {
+  int dd=0,mm=0;
+  String d="",m="";
   DateTime now = rtc.now();
 
-  int dd = now.day();
-  int mm = now.month();
+  dd = now.day();
+  mm = now.month();
 
-  String d = String(dd);
-  String m = String(mm);
+  d = String(now.day());
+  m = String(now.month());
 
   if (dd < 10) d = "0" + d;
   if (mm < 10) m = "0" + m;
@@ -29,21 +31,23 @@ String getDateInfo(RTC_DS1307 rtc) {
 }
 
 String getTimeInfo(RTC_DS1307 rtc, int MODE) {
+  String h = "", m = "", returnTime = "", postfix = " AM";
+  int hours = 0, minutes = 0;
   DateTime now = rtc.now();
 
-  int hh = now.hour();
-  int mm = now.minute();
+  hours = now.hour();
+  minutes = now.minute();
 
-  String h = String(hh);
-  String m = String(mm);
+  h = String(now.hour());
+  m = String(now.minute());
 
   if (MODE == 0) {
     if (hours < 10)  h = "0" + String(hours);
     if (minutes < 10) m = "0" + String(minutes);
 
-    String returnTime = h + ":" + m;
+    returnTime = h + ":" + m;
     return returnTime;
-  }
+  } 
 }
 
 void setTime() {
@@ -60,7 +64,6 @@ void setDate() {
   String m = String(date[3]) + String(date[4]) ;
   days = d.toInt();
   months = m.toInt();
-  
   rtc.adjust(DateTime(date[9], months, days, rtc.now().hour(), rtc.now().minute(), 0));
 }
 

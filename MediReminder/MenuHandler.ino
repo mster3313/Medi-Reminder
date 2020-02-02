@@ -1,21 +1,3 @@
-
-
-//Exit Codes
-#define EXIT_CODE_MAIN_MENU 50
-#define EXIT_CODE_DISABLE_ALARM 51
-#define EXIT_CODE_SET_ALARM 52
-#define EXIT_CODE_SET_ALARM_MENU 53
-
-//Destination menu Codes
-#define MOVE_TO_SET_ALARM 20
-#define MOVE_TO_DISABLE_ALARM 21
-#define MOVE_TO_SET_ALARM_MENU 22
-#define MOVE_TO_SET_ALARM_FINAL 23
-#define MOVE_TO_ADJUST_TIME_FINAL 24
-#define MOVE_TO_ADJUST_TIME 25
-#define MOVE_TO_ADJUST_DATE 26
-#define MOVE_TO_ADJUST_DATE_FINAL 27
-
 //Hack Variables
 int index = 0;
 unsigned int action = 0;
@@ -287,7 +269,7 @@ void displayMenuWithTime(unsigned int menuId, int whichAlarm) {
       lcd.setCursor(11, 1);
       lcd.print(prevAlarm);
       lcd.setCursor(5, 0);
-      printTimeOnLCD(alarmClock);
+      printTime(alarmClock);
       lcd.setCursor(5, 0);
       lcd.blink();
       break;
@@ -295,7 +277,7 @@ void displayMenuWithTime(unsigned int menuId, int whichAlarm) {
       lcd.noBlink();
       lcd.noCursor();
       lcd.setCursor(5, 0);
-      printTimeOnLCD(alarmClock);
+      printTime(alarmClock);
       lcd.setCursor(optionArrowColumn, 1);
       lcd.write(0);
       lcd.setCursor(2, 1);
@@ -380,7 +362,7 @@ void displayMenu(unsigned int menu_id) {
 
     case ADJUST_TIME:
       lcd.setCursor(5, 0);
-      printTimeOnLCD(alarmClock);
+      printTime(alarmClock);
       lcd.setCursor(5, 0);
       lcd.blink();
       break;
@@ -389,7 +371,7 @@ void displayMenu(unsigned int menu_id) {
       lcd.noBlink();
       lcd.noCursor();
       lcd.setCursor(5, 0);
-      printTimeOnLCD(alarmClock);
+      printTime(alarmClock);
       lcd.setCursor(optionArrowColumn, 1);
       lcd.write(0);
       lcd.setCursor(2, 1);

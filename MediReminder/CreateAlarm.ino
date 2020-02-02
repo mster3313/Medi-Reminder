@@ -1,4 +1,3 @@
-//Button Debounce Hanling Variables
 int move_right_buttonState;
 int move_right_lastButtonState = LOW;
 
@@ -14,15 +13,17 @@ int decrement_lastButtonState = LOW;
 unsigned long lastDebounceTime = 0;
 unsigned long debounceDelay = 50;
 
-
-
 int cursorPosition = 5;
 int currentValue = 0;
 unsigned int temp = 0;
 
 int alarmClock[5] = {0, 0, 0, 0, 0};
 
-void printTimeOnLCD(int timeArray[] ) {
+boolean alarm_one = false;
+boolean alarm_two = false;
+boolean alarm_three = false;
+
+void printTime(int timeArray[] ) {
   lcd.print(timeArray[0]);
   lcd.print(timeArray[1]);
   lcd.print(":");
@@ -34,38 +35,48 @@ String createAlarmString() {
   return String(alarmClock[0]) + String(alarmClock[1]) + ":" + String(alarmClock[3]) + String(alarmClock[4]);
 }
 
+void disableAlarm() {
+  String diabledAlarm = "";
+  if (temp == 1) {
+    alarm_one = false;
+    diabledAlarm = alarmOne;
+    alarmOne = "";
+  }
+  if (temp == 2) {
+    alarm_two = false;
+    diabledAlarm = alarmTwo;
+    alarmTwo = "";
+  }
+  if (temp == 3) {
+    alarm_three = false;
+    diabledAlarm = alarmThree;
+    alarmThree = "";
+  }
+  lcd.clear();
+  lcd.setCursor(5, 0);
+  lcd.print(diabledAlarm);
+  lcd.setCursor(2, 1);
+  lcd.print("Alarm Removed");
+  delay(1500);
+}
+
 void enableAlarm() {
   String createdAlarm = "";
   if (temp == 1) {
     alarmOne = createAlarmString();
     createdAlarm = alarmOne;
     alarm_one = true;
-
-    //Add to eeprom object
-    alarm.alarmOneStatus = alarm_one;
-    alarm.alarmStringOne = alarmOne;
   }
   if (temp == 2) {
     alarmTwo = createAlarmString();
     createdAlarm = alarmTwo;
     alarm_two = true;
-
-    //Add to eeprom object
-    alarm.alarmTwoStatus = alarm_two;
-    alarm.alarmStringTwo = alarmTwo;
   }
   if (temp == 3) {
     alarmThree = createAlarmString();
     createdAlarm = alarmThree;
     alarm_three = true;
-
-    //Add to eeprom object
-    alarm.alarmThreeStatus = alarm_three;
-    alarm.alarmStringThree = alarmThree;
   }
-
-  EEPROM.put(eeAddress, alarm);
-
   lcd.clear();
   lcd.setCursor(5, 0);
   lcd.print(createdAlarm);
@@ -73,49 +84,6 @@ void enableAlarm() {
   lcd.print("Alarm Created");
   delay(1500);
 
-}
-
-void disableAlarm() {
-  String diabledAlarm = "";
-
-  if (temp == 1) {
-    alarm_one = false;
-    diabledAlarm = alarmOne;
-    alarmOne = "";
-
-    //Add to eeprom object
-    alarm.alarmOneStatus = alarm_one;
-    alarm.alarmStringOne = alarmOne;
-  }
-
-  if (temp == 2) {
-    alarm_two = false;
-    diabledAlarm = alarmTwo;
-    alarmTwo = "";
-
-    //Add to eeprom object
-    alarm.alarmTwoStatus = alarm_two;
-    alarm.alarmStringTwo = alarmTwo;
-  }
-
-  if (temp == 3) {
-    alarm_three = false;
-    diabledAlarm = alarmThree;
-    alarmThree = "";
-
-    //Add to eeprom object
-    alarm.alarmThreeStatus = alarm_three;
-    alarm.alarmStringThree = alarmThree;
-  }
-
-  EEPROM.put(eeAddress, alarm);
-
-  lcd.clear();
-  lcd.setCursor(5, 0);
-  lcd.print(diabledAlarm);
-  lcd.setCursor(2, 1);
-  lcd.print("Alarm Removed");
-  delay(1500);
 }
 
 void incrementCursor() {
@@ -183,7 +151,7 @@ void increaseValue() {
         alarmClock[cursorPosition - 5] = handleInvalidTimeSettings(cursorPosition, currentValue);
         lcd.clear();
         lcd.setCursor(5, 0);
-        printTimeOnLCD(alarmClock);
+        printTime(alarmClock);
         lcd.setCursor(cursorPosition, 0);
       }
 
@@ -209,7 +177,7 @@ void decreaseValue() {
         alarmClock[cursorPosition - 5] = handleInvalidTimeSettings(cursorPosition, currentValue);
         lcd.clear();
         lcd.setCursor(5, 0);
-        printTimeOnLCD(alarmClock);
+        printTime(alarmClock); 
         lcd.setCursor(cursorPosition, 0);
       }
 
